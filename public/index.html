@@ -1,183 +1,1594 @@
 <!doctype html>
-<html lang="en">
-	<head>
-		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>LLM Chat App</title>
-		<style>
-			:root {
-				--primary-color: #f6821f;
-				--primary-hover: #e67e22;
-				--light-bg: #f9fafb;
-				--border-color: #e5e7eb;
-				--text-color: #1f2937;
-				--text-light: #6b7280;
-				--user-msg-bg: #fff2e6;
-				--assistant-msg-bg: #f3f4f6;
-			}
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
-			* {
-				box-sizing: border-box;
-				margin: 0;
-				padding: 0;
-			}
+<title>Kama AI</title>
 
-			body {
-				font-family:
-					-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu,
-					Cantarell, sans-serif;
-				line-height: 1.6;
-				color: var(--text-color);
-				max-width: 800px;
-				margin: 0 auto;
-				padding: 1rem;
-			}
+<style>
 
-			header {
-				text-align: center;
-				margin-bottom: 2rem;
-				padding: 1rem 0;
-				border-bottom: 1px solid var(--border-color);
-			}
+/* =====================================================
+   KAMA AI
+===================================================== */
 
-			h1 {
-				font-size: 1.5rem;
-				color: var(--primary-color);
-			}
+:root{
+    --bg:#08090d;
+    --sidebar:#0d0f15;
+    --panel:#12151d;
+    --panel2:#181b24;
+    --border:#292d38;
 
-			.chat-container {
-				display: flex;
-				flex-direction: column;
-				height: calc(100vh - 200px);
-				min-height: 400px;
-				border: 1px solid var(--border-color);
-				border-radius: 8px;
-				overflow: hidden;
-			}
+    --text:#f5f7ff;
+    --muted:#858b9c;
 
-			.chat-messages {
-				flex: 1;
-				overflow-y: auto;
-				padding: 1rem;
-				background-color: var(--light-bg);
-			}
+    --purple:#8b5cf6;
+    --purple2:#6366f1;
 
-			.message {
-				margin-bottom: 1rem;
-				padding: 0.75rem;
-				border-radius: 8px;
-				max-width: 80%;
-			}
+    --user:#28233d;
+}
 
-			.message p {
-				white-space: pre-line;
-				margin: 0;
-				overflow-wrap: anywhere;
-			}
 
-			.user-message {
-				background-color: var(--user-msg-bg);
-				align-self: flex-end;
-				margin-left: auto;
-			}
+/* RESET */
 
-			.assistant-message {
-				background-color: var(--assistant-msg-bg);
-				align-self: flex-start;
-			}
+*{
+    box-sizing:border-box;
+    margin:0;
+    padding:0;
+}
 
-			.message-input {
-				display: flex;
-				padding: 0.75rem;
-				border-top: 1px solid var(--border-color);
-				background-color: white;
-			}
+html,
+body{
+    width:100%;
+    height:100%;
+}
 
-			#user-input {
-				flex: 1;
-				padding: 0.75rem;
-				border: 1px solid var(--border-color);
-				border-radius: 4px;
-				font-family: inherit;
-				resize: none;
-				min-height: 44px;
-			}
+body{
+    font-family:
+        Inter,
+        -apple-system,
+        BlinkMacSystemFont,
+        "Segoe UI",
+        sans-serif;
 
-			#send-button {
-				margin-left: 0.5rem;
-				padding: 0 1rem;
-				background-color: var(--primary-color);
-				color: white;
-				border: none;
-				border-radius: 4px;
-				cursor: pointer;
-				transition: background-color 0.2s;
-			}
+    background:
+        radial-gradient(
+            circle at 50% -10%,
+            #35205b55,
+            transparent 38%
+        ),
+        var(--bg);
 
-			#send-button:hover {
-				background-color: var(--primary-hover);
-			}
+    color:var(--text);
 
-			#send-button:disabled {
-				background-color: var(--text-light);
-				cursor: not-allowed;
-			}
+    overflow:hidden;
+}
 
-			.typing-indicator {
-				display: none;
-				font-style: italic;
-				color: var(--text-light);
-				padding: 1rem;
-			}
 
-			.typing-indicator.visible {
-				display: block;
-			}
+/* =====================================================
+   APP
+===================================================== */
 
-			footer {
-				margin-top: 1rem;
-				text-align: center;
-				font-size: 0.85rem;
-				color: var(--text-light);
-			}
-		</style>
-	</head>
-	<body>
-		<header>
-			<h1>Cloudflare AI Chat</h1>
-			<p>Powered by Cloudflare Workers AI</p>
-		</header>
+.app{
+    height:100dvh;
+    display:flex;
+}
 
-		<div class="chat-container">
-			<div id="chat-messages" class="chat-messages">
-				<div class="message assistant-message">
-					<p>
-						Hello! I'm an LLM chat app powered by Cloudflare Workers AI. How can
-						I help you today?
-					</p>
-				</div>
-			</div>
 
-			<div class="typing-indicator" id="typing-indicator">
-				AI is thinking...
-			</div>
+/* =====================================================
+   SIDEBAR
+===================================================== */
 
-			<div class="message-input">
-				<textarea
-					id="user-input"
-					placeholder="Type your message here..."
-					rows="1"
-					autofocus
-				></textarea>
-				<button id="send-button">Send</button>
-			</div>
-		</div>
+.sidebar{
 
-		<footer>
-			<p>Cloudflare Workers AI Chat Template &copy; 2025</p>
-		</footer>
+    width:275px;
 
-		<!-- Chat app script -->
-		<script src="chat.js"></script>
-	</body>
-</html>
+    height:100%;
+
+    background:
+        linear-gradient(
+            180deg,
+            #101219,
+            #0b0d12
+        );
+
+    border-right:1px solid var(--border);
+
+    display:flex;
+    flex-direction:column;
+
+    padding:14px;
+
+    flex-shrink:0;
+}
+
+
+/* BRAND */
+
+.sidebar-brand{
+
+    display:flex;
+    align-items:center;
+
+    gap:10px;
+
+    padding:8px 7px 20px;
+}
+
+.sidebar-logo{
+
+    width:36px;
+    height:36px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:12px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #a78bfa,
+            #7c3aed,
+            #4f46e5
+        );
+
+    box-shadow:
+        0 0 25px #8b5cf655;
+
+    font-size:18px;
+}
+
+.sidebar-title{
+
+    font-size:17px;
+    font-weight:700;
+}
+
+.sidebar-title span{
+    color:#a78bfa;
+}
+
+
+/* NEW CHAT */
+
+.new-chat{
+
+    width:100%;
+
+    padding:12px 13px;
+
+    border-radius:12px;
+
+    border:1px solid #343846;
+
+    background:#181b23;
+
+    color:white;
+
+    font-family:inherit;
+
+    font-size:13px;
+    font-weight:600;
+
+    cursor:pointer;
+
+    text-align:left;
+
+    transition:.2s;
+}
+
+.new-chat:hover{
+    background:#222631;
+    border-color:#494e60;
+}
+
+.new-chat:active{
+    transform:scale(.98);
+}
+
+
+/* RECENT TITLE */
+
+.recent-title{
+
+    margin:
+
+        24px
+        8px
+        8px;
+
+    font-size:10px;
+
+    font-weight:700;
+
+    letter-spacing:1px;
+
+    color:#666c7c;
+}
+
+
+/* RECENT LIST */
+
+.recent-list{
+
+    flex:1;
+
+    overflow-y:auto;
+
+    padding-right:2px;
+}
+
+.recent-list::-webkit-scrollbar{
+    width:4px;
+}
+
+.recent-list::-webkit-scrollbar-thumb{
+    background:#292d38;
+    border-radius:20px;
+}
+
+
+/* RECENT ITEM */
+
+.recent-item{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:9px;
+
+    padding:10px;
+
+    margin-bottom:3px;
+
+    border-radius:10px;
+
+    color:#aeb3c2;
+
+    font-size:13px;
+
+    cursor:pointer;
+
+    transition:.18s;
+}
+
+.recent-item:hover{
+    background:#191c24;
+    color:white;
+}
+
+.recent-icon{
+    color:#8170c8;
+    font-size:13px;
+}
+
+.recent-name{
+
+    flex:1;
+
+    overflow:hidden;
+
+    white-space:nowrap;
+
+    text-overflow:ellipsis;
+}
+
+.delete-chat{
+
+    opacity:0;
+
+    color:#666d7d;
+
+    border:0;
+
+    background:none;
+
+    cursor:pointer;
+
+    font-size:14px;
+}
+
+.recent-item:hover .delete-chat{
+    opacity:1;
+}
+
+
+/* EMPTY */
+
+.empty-recent{
+
+    color:#555b69;
+
+    font-size:12px;
+
+    padding:10px 8px;
+
+    line-height:1.5;
+}
+
+
+/* PROFILE */
+
+.profile{
+
+    border-top:1px solid var(--border);
+
+    padding-top:12px;
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+}
+
+.profile-avatar{
+
+    width:34px;
+    height:34px;
+
+    display:grid;
+    place-items:center;
+
+    border-radius:50%;
+
+    background:
+        linear-gradient(
+            135deg,
+            #292d38,
+            #171a22
+        );
+
+    border:1px solid #343946;
+}
+
+.profile-name{
+    font-size:12px;
+    font-weight:600;
+}
+
+.profile-sub{
+    color:#666c7a;
+    font-size:10px;
+}
+
+
+/* =====================================================
+   MAIN
+===================================================== */
+
+.main{
+
+    flex:1;
+
+    min-width:0;
+
+    height:100%;
+
+    display:flex;
+    flex-direction:column;
+
+    position:relative;
+}
+
+
+/* =====================================================
+   HEADER
+===================================================== */
+
+header{
+
+    height:62px;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 18px;
+
+    border-bottom:1px solid var(--border);
+
+    background:#0b0d12cc;
+
+    backdrop-filter:blur(20px);
+    -webkit-backdrop-filter:blur(20px);
+
+    z-index:5;
+}
+
+
+.header-left{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:10px;
+}
+
+
+.mobile-menu{
+
+    display:none;
+
+    width:36px;
+    height:36px;
+
+    border:0;
+
+    background:transparent;
+
+    color:white;
+
+    font-size:21px;
+
+    cursor:pointer;
+}
+
+
+.logo{
+
+    width:34px;
+    height:34px;
+
+    border-radius:11px;
+
+    display:grid;
+
+    place-items:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #a78bfa,
+            #7c3aed,
+            #4f46e5
+        );
+
+    box-shadow:
+        0 0 18px #8b5cf644;
+
+    font-size:17px;
+}
+
+.header-name{
+
+    font-size:16px;
+
+    font-weight:700;
+}
+
+.header-name span{
+    color:#a78bfa;
+}
+
+
+.online{
+
+    display:flex;
+
+    align-items:center;
+
+    gap:6px;
+
+    color:#777d8c;
+
+    font-size:10px;
+}
+
+.online-dot{
+
+    width:7px;
+    height:7px;
+
+    border-radius:50%;
+
+    background:#22c55e;
+
+    box-shadow:
+        0 0 10px #22c55e;
+}
+
+
+/* =====================================================
+   CHAT
+===================================================== */
+
+.chat-container{
+
+    flex:1;
+
+    min-height:0;
+
+    display:flex;
+
+    flex-direction:column;
+
+    max-width:900px;
+
+    width:100%;
+
+    margin:auto;
+
+    border:0;
+
+    border-radius:0;
+
+    overflow:hidden;
+
+    background:transparent;
+}
+
+
+.chat-messages{
+
+    flex:1;
+
+    overflow-y:auto;
+
+    padding:
+        30px
+        18px
+        165px;
+
+    scroll-behavior:smooth;
+}
+
+.chat-messages::-webkit-scrollbar{
+    width:5px;
+}
+
+.chat-messages::-webkit-scrollbar-thumb{
+    background:#292d38;
+
+    border-radius:20px;
+}
+
+
+/* =====================================================
+   WELCOME
+===================================================== */
+
+.welcome{
+
+    min-height:58vh;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    flex-direction:column;
+
+    text-align:center;
+
+    padding:25px;
+}
+
+
+.welcome-logo{
+
+    width:76px;
+    height:76px;
+
+    border-radius:25px;
+
+    display:grid;
+
+    place-items:center;
+
+    background:
+        linear-gradient(
+            135deg,
+            #a78bfa,
+            #7c3aed,
+            #4f46e5
+        );
+
+    box-shadow:
+        0 0 30px #8b5cf655,
+        0 0 80px #8b5cf622;
+
+    font-size:33px;
+
+    margin-bottom:23px;
+
+    animation:
+        float 4s ease-in-out infinite;
+}
+
+@keyframes float{
+
+    0%,100%{
+        transform:translateY(0);
+    }
+
+    50%{
+        transform:translateY(-6px);
+    }
+
+}
+
+
+.welcome h1{
+
+    font-size:28px;
+
+    letter-spacing:-1px;
+
+    margin-bottom:7px;
+}
+
+.welcome p{
+
+    color:var(--muted);
+
+    font-size:14px;
+}
+
+
+/* =====================================================
+   MESSAGES
+===================================================== */
+
+.message{
+
+    width:100%;
+
+    max-width:780px;
+
+    margin:
+        0 auto 18px;
+
+    padding:
+        14px
+        17px;
+
+    border-radius:18px;
+
+    line-height:1.65;
+
+    font-size:15px;
+
+    overflow-wrap:anywhere;
+
+    animation:
+        messageIn .25s ease;
+}
+
+@keyframes messageIn{
+
+    from{
+        opacity:0;
+        transform:translateY(8px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+}
+
+.message p{
+
+    white-space:pre-line;
+
+    margin:0;
+
+    overflow-wrap:anywhere;
+}
+
+
+/* USER */
+
+.user-message{
+
+    background:
+        linear-gradient(
+            135deg,
+            #2b2442,
+            #211d32
+        );
+
+    border:1px solid #40365d;
+
+    width:fit-content;
+
+    max-width:82%;
+
+    margin-left:auto;
+
+    box-shadow:
+        0 7px 25px #0004;
+}
+
+
+/* AI */
+
+.assistant-message{
+
+    background:
+        linear-gradient(
+            135deg,
+            #151821,
+            #11131a
+        );
+
+    border:1px solid #292d38;
+
+    margin-right:auto;
+
+    box-shadow:
+        0 7px 25px #0003;
+}
+
+.assistant-message::before{
+
+    content:"✦";
+
+    display:grid;
+
+    place-items:center;
+
+    width:27px;
+    height:27px;
+
+    border-radius:9px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #8b5cf6,
+            #4f46e5
+        );
+
+    font-size:12px;
+
+    margin-bottom:8px;
+
+    box-shadow:
+        0 0 13px #8b5cf644;
+}
+
+
+/* =====================================================
+   INPUT
+===================================================== */
+
+.message-input{
+
+    position:fixed;
+
+    left:calc(
+        275px + (100% - 275px) / 2
+    );
+
+    transform:translateX(-50%);
+
+    bottom:0;
+
+    width:min(
+        900px,
+        calc(100% - 275px)
+    );
+
+    padding:
+        12px
+        15px
+        calc(12px + env(safe-area-inset-bottom));
+
+    display:flex;
+
+    align-items:flex-end;
+
+    gap:8px;
+
+    background:
+        linear-gradient(
+            transparent,
+            #08090d 35%
+        );
+
+    z-index:10;
+}
+
+
+#user-input{
+
+    flex:1;
+
+    min-height:52px;
+
+    max-height:140px;
+
+    padding:
+        15px
+        53px
+        15px
+        17px;
+
+    resize:none;
+
+    outline:none;
+
+    border:1px solid #303440;
+
+    border-radius:18px;
+
+    background:#151720ee;
+
+    color:white;
+
+    font-family:inherit;
+
+    font-size:15px;
+
+    line-height:1.4;
+
+    box-shadow:
+        0 10px 40px #0009;
+
+    backdrop-filter:blur(20px);
+
+    transition:.2s;
+}
+
+#user-input:focus{
+
+    border-color:#6d5ab2;
+
+    box-shadow:
+        0 0 0 3px #8b5cf615,
+        0 10px 40px #0009;
+}
+
+#user-input::placeholder{
+    color:#707686;
+}
+
+
+/* SEND */
+
+#send-button{
+
+    position:absolute;
+
+    right:25px;
+
+    bottom:22px;
+
+    width:40px;
+    height:40px;
+
+    border:0;
+
+    border-radius:13px;
+
+    background:
+        linear-gradient(
+            135deg,
+            #9b7bff,
+            #6948e8
+        );
+
+    color:white;
+
+    font-size:19px;
+
+    cursor:pointer;
+
+    box-shadow:
+        0 5px 20px #7c3aed55;
+
+    transition:.15s;
+}
+
+#send-button:hover{
+    transform:scale(1.06);
+}
+
+#send-button:active{
+    transform:scale(.92);
+}
+
+#send-button:disabled{
+    opacity:.45;
+}
+
+
+/* =====================================================
+   TYPING
+===================================================== */
+
+.typing-indicator{
+
+    display:none;
+
+    position:fixed;
+
+    bottom:92px;
+
+    left:50%;
+
+    transform:translateX(-50%);
+
+    padding:
+        8px
+        13px;
+
+    border-radius:30px;
+
+    background:#171923ee;
+
+    border:1px solid #303440;
+
+    color:#9298a8;
+
+    font-size:11px;
+
+    backdrop-filter:blur(15px);
+
+    z-index:20;
+}
+
+.typing-indicator.visible{
+    display:block;
+}
+
+
+/* =====================================================
+   FOOTER
+===================================================== */
+
+footer{
+    display:none;
+}
+
+
+/* =====================================================
+   MOBILE
+===================================================== */
+
+@media(max-width:700px){
+
+    .sidebar{
+
+        position:fixed;
+
+        z-index:100;
+
+        top:0;
+        bottom:0;
+        left:-290px;
+
+        width:280px;
+
+        transition:
+            left .25s ease;
+
+        box-shadow:
+            15px 0 50px #000b;
+    }
+
+    .sidebar.open{
+        left:0;
+    }
+
+
+    .mobile-menu{
+        display:block;
+    }
+
+
+    header{
+        height:58px;
+
+        padding:
+            0
+            12px;
+    }
+
+
+    .chat-messages{
+
+        padding:
+            20px
+            11px
+            150px;
+    }
+
+
+    .message{
+
+        font-size:14px;
+
+        padding:
+            13px
+            14px;
+
+        border-radius:17px;
+    }
+
+
+    .user-message{
+        max-width:88%;
+    }
+
+
+    .welcome{
+
+        min-height:62vh;
+
+        padding:20px;
+    }
+
+
+    .welcome-logo{
+
+        width:67px;
+        height:67px;
+
+        border-radius:22px;
+
+        font-size:28px;
+    }
+
+
+    .welcome h1{
+        font-size:23px;
+    }
+
+
+    .welcome p{
+        font-size:13px;
+    }
+
+
+    .message-input{
+
+        left:0;
+
+        transform:none;
+
+        width:100%;
+
+        padding:
+            9px
+            10px
+            calc(9px + env(safe-area-inset-bottom));
+    }
+
+
+    #user-input{
+
+        min-height:50px;
+
+        border-radius:17px;
+
+        padding:
+            14px
+            50px
+            14px
+            15px;
+    }
+
+
+    #send-button{
+
+        right:19px;
+
+        bottom:19px;
+
+        width:38px;
+        height:38px;
+    }
+
+}
+
+
+/* =====================================================
+   EXTRA SMALL
+===================================================== */
+
+@media(max-width:360px){
+
+    .header-name{
+        font-size:14px;
+    }
+
+    .online{
+        display:none;
+    }
+
+    .welcome h1{
+        font-size:21px;
+    }
+
+}
+
+</style>
+</head>
+
+
+<body>
+
+
+<div class="app">
+
+
+<!-- =================================================
+     SIDEBAR
+================================================= -->
+
+<aside class="sidebar" id="sidebar">
+
+
+    <div class="sidebar-brand">
+
+        <div class="sidebar-logo">
+            ✦
+        </div>
+
+        <div class="sidebar-title">
+            Kama <span>AI</span>
+        </div>
+
+    </div>
+
+
+    <button
+        class="new-chat"
+        onclick="newChat()"
+    >
+        ＋ &nbsp; Chat baru
+    </button>
+
+
+    <div class="recent-title">
+        RECENT
+    </div>
+
+
+    <div
+        class="recent-list"
+        id="recent-list"
+    ></div>
+
+
+    <div class="profile">
+
+        <div class="profile-avatar">
+            👤
+        </div>
+
+        <div>
+
+            <div class="profile-name">
+                Kama User
+            </div>
+
+            <div class="profile-sub">
+                Kama AI
+            </div>
+
+        </div>
+
+    </div>
+
+
+</aside>
+
+
+
+<!-- =================================================
+     MAIN
+================================================= -->
+
+<main class="main">
+
+
+<header>
+
+
+    <div class="header-left">
+
+        <button
+            class="mobile-menu"
+            onclick="toggleSidebar()"
+        >
+            ☰
+        </button>
+
+
+        <div class="logo">
+            ✦
+        </div>
+
+
+        <div class="header-name">
+            Kama <span>AI</span>
+        </div>
+
+    </div>
+
+
+    <div class="online">
+
+        <span class="online-dot"></span>
+
+        Online
+
+    </div>
+
+
+</header>
+
+
+
+<div class="chat-container">
+
+
+    <div
+        id="chat-messages"
+        class="chat-messages"
+    >
+
+
+        <div
+            class="welcome"
+            id="welcome"
+        >
+
+            <div class="welcome-logo">
+                ✦
+            </div>
+
+            <h1>
+                Apa yang bisa saya bantu?
+            </h1>
+
+            <p>
+                Tanyakan apa saja kepada Kama AI.
+            </p>
+
+        </div>
+
+
+        <div class="message assistant-message">
+
+            <p>
+                Halo! 👋 Saya Kama AI.
+
+                Ada yang ingin kamu tanyakan?
+            </p>
+
+        </div>
+
+
+    </div>
+
+
+    <div
+        class="typing-indicator"
+        id="typing-indicator"
+    >
+        Kama AI sedang berpikir...
+    </div>
+
+
+    <div class="message-input">
+
+
+        <textarea
+            id="user-input"
+            placeholder="Tanyakan sesuatu..."
+            rows="1"
+            autocomplete="off"
+            autofocus
+        ></textarea>
+
+
+        <button id="send-button">
+            ↑
+        </button>
+
+
+    </div>
+
+
+</div>
+
+
+</main>
+
+</div>
+
+
+<script>
+
+/* =====================================================
+   KAMA AI RECENT SYSTEM
+===================================================== */
+
+const RECENT_KEY = "kama_ai_recent_v1";
+
+let currentChatId =
+    "chat_" +
+    Date.now();
+
+
+/* LOAD */
+
+function loadRecent(){
+
+    const data =
+        JSON.parse(
+            localStorage.getItem(RECENT_KEY)
+            || "[]"
+        );
+
+    renderRecent(data);
+}
+
+
+/* SAVE */
+
+function saveRecent(data){
+
+    localStorage.setItem(
+        RECENT_KEY,
+        JSON.stringify(data)
+    );
+
+}
+
+
+/* RENDER */
+
+function renderRecent(data){
+
+    const list =
+        document.getElementById(
+            "recent-list"
+        );
+
+    if(!data.length){
+
+        list.innerHTML = `
+            <div class="empty-recent">
+                Belum ada percakapan.<br>
+                Mulai chat pertama kamu ✦
+            </div>
+        `;
+
+        return;
+    }
+
+
+    list.innerHTML =
+        data.map(chat => `
+
+            <div
+                class="recent-item"
+                data-id="${chat.id}"
+            >
+
+                <span class="recent-icon">
+                    ✦
+                </span>
+
+                <span class="recent-name">
+                    ${escapeHTML(chat.title)}
+                </span>
+
+                <button
+                    class="delete-chat"
+                    onclick="deleteChat('${chat.id}',event)"
+                >
+                    ×
+                </button>
+
+            </div>
+
+        `).join("");
+
+
+    document
+        .querySelectorAll(".recent-item")
+        .forEach(item => {
+
+            item.onclick = function(){
+
+                openChat(
+                    this.dataset.id
+                );
+
+            };
+
+        });
+
+}
+
+
+/* ADD FIRST MESSAGE */
+
+function addRecent(title){
+
+    title =
+        title
+        .replace(/\s+/g," ")
+        .trim();
+
+
+    if(!title) return;
+
+
+    let data =
+        JSON.parse(
+            localStorage.getItem(RECENT_KEY)
+            || "[]"
+        );
+
+
+    /*
+       Potong supaya judul tidak kepanjangan
+    */
+
+    if(title.length > 38){
+
+        title =
+            title.substring(0,38)
+            + "...";
+
+    }
+
+
+    /*
+       Jangan double
+    */
+
+    data =
+        data.filter(
+            chat =>
+                chat.id !== currentChatId
+        );
+
+
+    data.unshift({
+
+        id:currentChatId,
+
+        title:title,
+
+        created:Date.now()
+
+    });
+
+
+    /*
+       Simpan maksimal 30 chat
+    */
+
+    data =
+        data.slice(0,30);
+
+
+    saveRecent(data);
+
+    renderRecent(data);
+
+}
+
+
+/* DELETE */
+
+function deleteChat(id,event){
+
+    event.stopPropagation();
+
+
+    let data =
+        JSON.parse(
+            localStorage.getItem(RECENT_KEY)
+            || "[]"
+        );
+
+
+    data =
+        data.filter(
+            chat =>
+                chat.id !== id
+        );
+
+
+    saveRecent(data);
+
+    renderRecent(data);
+
+}
+
+
+/* OPEN */
+
+function openChat(id){
+
+    /*
+       Versi ini membuka kembali chat
+       secara visual.
+
+       Riwayat AI tetap ditangani oleh
+       chat.js / backend.
+    */
+
+    const data =
+        JSON.parse(
+            localStorage.getItem(RECENT_KEY)
+            || "[]"
+        );
+
+
+    const chat =
+        data.find(
+            item =>
+                item.id === id
+        );
+
+
+    if(!chat) return;
+
+
+    /*
+       Untuk sementara kita mulai sesi
+       baru dengan judul chat tersebut.
+    */
+
+    if(
+        confirm(
+            "Buka percakapan \"" +
+            chat.title +
+            "\"?"
+        )
+    ){
+
+        currentChatId = id;
+
+        location.reload();
+
+    }
+
+}
+
+
+/* NEW CHAT */
+
+function newChat(){
+
+    if(
+        confirm(
+            "Mulai chat baru?"
+        )
+    ){
+
+        currentChatId =
+            "chat_" +
+            Date.now();
+
+        location.reload();
+
+    }
+
+}
+
+
+/* SIDEBAR */
+
+function toggleSidebar(){
+
+    document
+        .getElementById("sidebar")
+        .classList.toggl
